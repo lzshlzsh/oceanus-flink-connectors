@@ -19,7 +19,7 @@
 package org.apache.flink.connector.pulsar.sink.writer.topic;
 
 import org.apache.flink.annotation.Internal;
-import org.apache.flink.api.common.operators.ProcessingTimeService;
+import org.apache.flink.api.connector.sink.Sink;
 import org.apache.flink.connector.pulsar.sink.config.SinkConfiguration;
 
 import java.io.Closeable;
@@ -38,5 +38,5 @@ public interface TopicRegister<IN> extends Serializable, Closeable {
     List<String> topics(IN in);
 
     /** Register the topic metadata update in process time service. */
-    void open(SinkConfiguration sinkConfiguration, ProcessingTimeService timeService);
+    void open(SinkConfiguration sinkConfiguration, Sink.ProcessingTimeService timeService);
 }

@@ -34,6 +34,8 @@ import org.apache.flink.connector.pulsar.table.sink.PulsarTableSerializationSche
 import org.apache.flink.connector.pulsar.table.sink.PulsarTableSink;
 import org.apache.flink.connector.pulsar.table.source.PulsarTableDeserializationSchemaFactory;
 import org.apache.flink.connector.pulsar.table.source.PulsarTableSource;
+import org.apache.flink.table.catalog.ResolvedSchema;
+import org.apache.flink.table.catalog.UniqueConstraint;
 import org.apache.flink.table.connector.ChangelogMode;
 import org.apache.flink.table.connector.format.DecodingFormat;
 import org.apache.flink.table.connector.format.EncodingFormat;
@@ -128,7 +130,7 @@ public class PulsarTableFactory implements DynamicTableSourceFactory, DynamicTab
                 PulsarSinkOptions.SINK_CONFIG_PREFIX);
 
         validatePrimaryKeyConstraints(
-                context.getObjectIdentifier(), context.getPrimaryKeyIndexes(), helper);
+                context.getObjectIdentifier(), getPrimaryKeyIndexes(context), helper);
 
         validateTableSourceOptions(tableOptions);
 
@@ -150,7 +152,8 @@ public class PulsarTableFactory implements DynamicTableSourceFactory, DynamicTab
                         .orElse(DEFAULT_SUBSCRIPTION_NAME_PREFIX + randomAlphabetic(5)));
         // Retrieve physical fields (not including computed or metadata fields),
         // and projections and create a schema factory based on such information.
-        final DataType physicalDataType = context.getPhysicalRowDataType();
+        final DataType physicalDataType =
+                context.getCatalogTable().getResolvedSchema().toPhysicalRowDataType();
 
         final int[] valueProjection = createValueFormatProjection(tableOptions, physicalDataType);
         final int[] keyProjection = createKeyFormatProjection(tableOptions, physicalDataType);
@@ -201,7 +204,7 @@ public class PulsarTableFactory implements DynamicTableSourceFactory, DynamicTab
                 PulsarSinkOptions.SINK_CONFIG_PREFIX);
 
         validatePrimaryKeyConstraints(
-                context.getObjectIdentifier(), context.getPrimaryKeyIndexes(), helper);
+                context.getObjectIdentifier(), getPrimaryKeyIndexes(context), helper);
 
         validateTableSinkOptions(tableOptions);
 
@@ -219,7 +222,8 @@ public class PulsarTableFactory implements DynamicTableSourceFactory, DynamicTab
         properties.setProperty(PULSAR_SERVICE_URL.key(), tableOptions.get(SERVICE_URL));
 
         // Retrieve physical DataType (not including computed or metadata fields)
-        final DataType physicalDataType = context.getPhysicalRowDataType();
+        final DataType physicalDataType =
+                context.getCatalogTable().getResolvedSchema().toPhysicalRowDataType();
         final int[] keyProjection = createKeyFormatProjection(tableOptions, physicalDataType);
         final int[] valueProjection = createValueFormatProjection(tableOptions, physicalDataType);
 
@@ -284,7 +288,7 @@ public class PulsarTableFactory implements DynamicTableSourceFactory, DynamicTab
      *
      * @return
      */
-    @Override
+    //    @Override
     public Set<ConfigOption<?>> forwardOptions() {
         return Stream.of(
                         TOPICS,
@@ -301,5 +305,15 @@ public class PulsarTableFactory implements DynamicTableSourceFactory, DynamicTab
                         SINK_TOPIC_ROUTING_MODE,
                         SINK_MESSAGE_DELAY_INTERVAL)
                 .collect(Collectors.toSet());
+    }
+
+    private int[] getPrimaryKeyIndexes(Context context) {
+        final ResolvedSchema resolvedSchema = context.getCatalogTable().getResolvedSchema();
+        final List<String> columns = resolvedSchema.getColumnNames();
+        return resolvedSchema
+                .getPrimaryKey()
+                .map(UniqueConstraint::getColumns)
+                .map(pkColumns -> pkColumns.stream().mapToInt(columns::indexOf).toArray())
+                .orElseGet(() -> new int[] {});
     }
 }

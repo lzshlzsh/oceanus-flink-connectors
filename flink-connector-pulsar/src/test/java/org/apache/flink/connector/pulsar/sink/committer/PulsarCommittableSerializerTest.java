@@ -43,7 +43,7 @@ class PulsarCommittableSerializerTest {
                         ThreadLocalRandom.current().nextLong(),
                         ThreadLocalRandom.current().nextLong());
 
-        PulsarCommittable committable = new PulsarCommittable(txnID, topic);
+        PulsarCommittable committable = new PulsarCommittable(txnID, topic, 0);
 
         byte[] bytes = INSTANCE.serialize(committable);
         PulsarCommittable committable1 = INSTANCE.deserialize(INSTANCE.getVersion(), bytes);
