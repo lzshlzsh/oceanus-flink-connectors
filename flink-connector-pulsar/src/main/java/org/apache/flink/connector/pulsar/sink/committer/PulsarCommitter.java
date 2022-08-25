@@ -69,6 +69,11 @@ public class PulsarCommitter implements Committer<PulsarCommittable>, Closeable 
     public List<PulsarCommittable> commit(List<PulsarCommittable> committables)
             throws IOException, InterruptedException {
         List<PulsarCommittable> retryableCommittables = new ArrayList<>();
+
+        if (sinkConfiguration.getDeliveryGuarantee() != DeliveryGuarantee.EXACTLY_ONCE) {
+            return retryableCommittables;
+        }
+
         TransactionCoordinatorClient client = transactionCoordinatorClient();
 
         for (PulsarCommittable committable : committables) {
