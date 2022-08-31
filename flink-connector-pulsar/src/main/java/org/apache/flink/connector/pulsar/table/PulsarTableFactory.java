@@ -57,6 +57,7 @@ import java.util.stream.Stream;
 
 import static org.apache.flink.connector.pulsar.common.config.PulsarOptions.PULSAR_ADMIN_URL;
 import static org.apache.flink.connector.pulsar.common.config.PulsarOptions.PULSAR_SERVICE_URL;
+import static org.apache.flink.connector.pulsar.sink.PulsarSinkOptions.PULSAR_WRITE_DELIVERY_GUARANTEE;
 import static org.apache.flink.connector.pulsar.source.PulsarSourceOptions.PULSAR_SUBSCRIPTION_NAME;
 import static org.apache.flink.connector.pulsar.table.PulsarTableOptionUtils.createKeyFormatProjection;
 import static org.apache.flink.connector.pulsar.table.PulsarTableOptionUtils.createValueFormatProjection;
@@ -237,7 +238,8 @@ public class PulsarTableFactory implements DynamicTableSourceFactory, DynamicTab
                         UPSERT_DISABLED);
 
         // Set default values for configuration not exposed to user.
-        final DeliveryGuarantee deliveryGuarantee = DeliveryGuarantee.AT_LEAST_ONCE;
+        final DeliveryGuarantee deliveryGuarantee =
+                tableOptions.get(PULSAR_WRITE_DELIVERY_GUARANTEE);
         final ChangelogMode changelogMode = valueEncodingFormat.getChangelogMode();
 
         return new PulsarTableSink(
