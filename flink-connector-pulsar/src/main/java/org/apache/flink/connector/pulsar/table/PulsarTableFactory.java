@@ -34,8 +34,6 @@ import org.apache.flink.connector.pulsar.table.sink.PulsarTableSerializationSche
 import org.apache.flink.connector.pulsar.table.sink.PulsarTableSink;
 import org.apache.flink.connector.pulsar.table.source.PulsarTableDeserializationSchemaFactory;
 import org.apache.flink.connector.pulsar.table.source.PulsarTableSource;
-import org.apache.flink.table.catalog.ResolvedSchema;
-import org.apache.flink.table.catalog.UniqueConstraint;
 import org.apache.flink.table.connector.ChangelogMode;
 import org.apache.flink.table.connector.format.DecodingFormat;
 import org.apache.flink.table.connector.format.EncodingFormat;
@@ -93,6 +91,7 @@ import static org.apache.flink.connector.pulsar.table.PulsarTableOptions.VALUE_F
 import static org.apache.flink.connector.pulsar.table.PulsarTableValidationUtils.validatePrimaryKeyConstraints;
 import static org.apache.flink.connector.pulsar.table.PulsarTableValidationUtils.validateTableSinkOptions;
 import static org.apache.flink.connector.pulsar.table.PulsarTableValidationUtils.validateTableSourceOptions;
+import static org.apache.flink.connector.pulsar.table.TableSchemaUtils.getPrimaryKeyIndices;
 import static org.apache.flink.table.factories.FactoryUtil.SINK_PARALLELISM;
 import static org.apache.pulsar.shade.org.apache.commons.lang3.RandomStringUtils.randomAlphabetic;
 
@@ -131,7 +130,9 @@ public class PulsarTableFactory implements DynamicTableSourceFactory, DynamicTab
                 PulsarSinkOptions.SINK_CONFIG_PREFIX);
 
         validatePrimaryKeyConstraints(
-                context.getObjectIdentifier(), getPrimaryKeyIndexes(context), helper);
+                context.getObjectIdentifier(),
+                getPrimaryKeyIndices(context.getCatalogTable().getResolvedSchema()),
+                helper);
 
         validateTableSourceOptions(tableOptions);
 
@@ -205,7 +206,9 @@ public class PulsarTableFactory implements DynamicTableSourceFactory, DynamicTab
                 PulsarSinkOptions.SINK_CONFIG_PREFIX);
 
         validatePrimaryKeyConstraints(
-                context.getObjectIdentifier(), getPrimaryKeyIndexes(context), helper);
+                context.getObjectIdentifier(),
+                getPrimaryKeyIndices(context.getCatalogTable().getResolvedSchema()),
+                helper);
 
         validateTableSinkOptions(tableOptions);
 
@@ -307,15 +310,5 @@ public class PulsarTableFactory implements DynamicTableSourceFactory, DynamicTab
                         SINK_TOPIC_ROUTING_MODE,
                         SINK_MESSAGE_DELAY_INTERVAL)
                 .collect(Collectors.toSet());
-    }
-
-    private int[] getPrimaryKeyIndexes(Context context) {
-        final ResolvedSchema resolvedSchema = context.getCatalogTable().getResolvedSchema();
-        final List<String> columns = resolvedSchema.getColumnNames();
-        return resolvedSchema
-                .getPrimaryKey()
-                .map(UniqueConstraint::getColumns)
-                .map(pkColumns -> pkColumns.stream().mapToInt(columns::indexOf).toArray())
-                .orElseGet(() -> new int[] {});
     }
 }
