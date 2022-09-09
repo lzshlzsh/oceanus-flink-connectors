@@ -36,7 +36,7 @@ import org.apache.flink.connector.pulsar.sink.writer.topic.ProducerRegister;
 import org.apache.flink.connector.pulsar.sink.writer.topic.TopicRegister;
 import org.apache.flink.util.FlinkRuntimeException;
 
-import org.apache.flink.shaded.guava30.com.google.common.base.Strings;
+import org.apache.flink.shaded.guava18.com.google.common.base.Strings;
 
 import org.apache.pulsar.client.api.CryptoKeyReader;
 import org.apache.pulsar.client.api.Schema;

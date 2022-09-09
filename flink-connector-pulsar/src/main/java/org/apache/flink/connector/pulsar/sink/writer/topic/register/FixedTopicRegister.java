@@ -26,8 +26,8 @@ import org.apache.flink.connector.pulsar.sink.writer.topic.TopicRegister;
 import org.apache.flink.connector.pulsar.sink.writer.topic.metadata.NotExistedTopicMetadataProvider;
 import org.apache.flink.connector.pulsar.source.enumerator.topic.TopicMetadata;
 
-import org.apache.flink.shaded.guava30.com.google.common.base.Objects;
-import org.apache.flink.shaded.guava30.com.google.common.collect.ImmutableList;
+import org.apache.flink.shaded.guava18.com.google.common.base.Objects;
+import org.apache.flink.shaded.guava18.com.google.common.collect.ImmutableList;
 
 import org.apache.pulsar.client.admin.PulsarAdminException;
 import org.slf4j.Logger;

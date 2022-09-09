@@ -36,7 +36,7 @@ import java.util.Set;
 import java.util.regex.Pattern;
 
 import static java.util.stream.Collectors.toSet;
-import static org.apache.flink.shaded.guava30.com.google.common.base.Predicates.not;
+import static org.apache.flink.shaded.guava18.com.google.common.base.Predicates.not;
 
 /** Subscribe to matching topics based on topic pattern. */
 public class TopicPatternSubscriber extends BasePulsarSubscriber {
