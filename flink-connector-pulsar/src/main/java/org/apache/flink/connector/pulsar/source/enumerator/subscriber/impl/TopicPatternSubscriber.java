@@ -65,7 +65,7 @@ public class TopicPatternSubscriber extends BasePulsarSubscriber {
                     .getTopics(namespace)
                     .parallelStream()
                     .filter(this::matchesSubscriptionMode)
-                    .filter(not(TopicNameUtils::isInternal))
+                    .filter(s -> not(TopicNameUtils::isInternal).apply(s))
                     .filter(topic -> topicPattern.matcher(topic).find())
                     .map(topic -> queryTopicMetadata(adminRequest, topic))
                     .filter(Objects::nonNull)

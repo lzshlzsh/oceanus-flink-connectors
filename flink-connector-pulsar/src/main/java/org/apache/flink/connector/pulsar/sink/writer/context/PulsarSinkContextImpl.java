@@ -34,7 +34,7 @@ public class PulsarSinkContextImpl implements PulsarSinkContext {
     public PulsarSinkContextImpl(
             Sink.InitContext initContext, SinkConfiguration sinkConfiguration) {
         this.parallelInstanceId = initContext.getSubtaskId();
-        this.numberOfParallelSubtasks = initContext.getNumberOfParallelSubtasks();
+        this.numberOfParallelSubtasks = -1;
         this.processingTimeService = initContext.getProcessingTimeService();
         this.enableSchemaEvolution = sinkConfiguration.isEnableSchemaEvolution();
     }

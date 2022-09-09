@@ -35,6 +35,7 @@ import org.apache.flink.connector.pulsar.sink.writer.serializer.PulsarSerializat
 import org.apache.flink.connector.pulsar.sink.writer.topic.ProducerRegister;
 import org.apache.flink.connector.pulsar.sink.writer.topic.TopicRegister;
 import org.apache.flink.util.FlinkRuntimeException;
+import org.apache.flink.util.UserCodeClassLoader;
 
 import org.apache.flink.shaded.guava18.com.google.common.base.Strings;
 
@@ -48,6 +49,7 @@ import javax.annotation.Nullable;
 
 import java.io.IOException;
 import java.util.Base64;
+import java.util.Collections;
 import java.util.List;
 import java.util.Map;
 import java.util.concurrent.atomic.AtomicLong;
@@ -118,7 +120,16 @@ public class PulsarWriter<IN> implements SinkWriter<IN, PulsarCommittable, Pulsa
         try {
             InitializationContext initializationContext =
                     new InitContextInitializationContextAdapter(
-                            initContext.getUserCodeClassLoader(),
+                            new UserCodeClassLoader() {
+                                @Override
+                                public ClassLoader asClassLoader() {
+                                    return Thread.currentThread().getContextClassLoader();
+                                }
+
+                                @Override
+                                public void registerReleaseHookIfAbsent(
+                                        String releaseHookName, Runnable releaseHook) {}
+                            },
                             () -> initContext.metricGroup().addGroup("user"));
             this.serializationSchema.open(initializationContext, sinkContext, sinkConfiguration);
         } catch (Exception e) {
@@ -130,7 +141,7 @@ public class PulsarWriter<IN> implements SinkWriter<IN, PulsarCommittable, Pulsa
     }
 
     @Override
-    public void write(IN element, Context context) throws IOException, InterruptedException {
+    public void write(IN element, Context context) throws IOException {
         PulsarMessage<?> message = serializationSchema.serialize(element, sinkContext);
 
         // Choose the right topic to send.
@@ -252,14 +263,18 @@ public class PulsarWriter<IN> implements SinkWriter<IN, PulsarCommittable, Pulsa
     }
 
     @Override
-    public List<PulsarCommittable> prepareCommit(boolean flush)
-            throws IOException, InterruptedException {
+    public List<PulsarCommittable> prepareCommit(boolean flush) throws IOException {
         flush(flush);
         if (deliveryGuarantee == DeliveryGuarantee.EXACTLY_ONCE) {
             return producerRegister.prepareCommit();
         } else {
             return emptyList();
         }
+    }
+
+    @Override
+    public List<PulsarWriterState> snapshotState() throws IOException {
+        return Collections.emptyList();
     }
 
     @Override

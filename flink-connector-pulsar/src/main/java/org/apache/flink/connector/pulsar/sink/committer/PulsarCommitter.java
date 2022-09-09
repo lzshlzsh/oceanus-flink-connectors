@@ -66,8 +66,7 @@ public class PulsarCommitter implements Committer<PulsarCommittable>, Closeable 
     }
 
     @Override
-    public List<PulsarCommittable> commit(List<PulsarCommittable> committables)
-            throws IOException, InterruptedException {
+    public List<PulsarCommittable> commit(List<PulsarCommittable> committables) throws IOException {
         List<PulsarCommittable> retryableCommittables = new ArrayList<>();
 
         if (sinkConfiguration.getDeliveryGuarantee() != DeliveryGuarantee.EXACTLY_ONCE) {
