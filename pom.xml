@@ -30,8 +30,8 @@ under the License.
 	</parent>
 
 
-	<artifactId>flink-connectors-pulsar</artifactId>
-	<name>Flink : Connectors : Pulsar </name>
+	<artifactId>oceanus-flink-connectors</artifactId>
+	<name>Flink : Oceanus : Connectors</name>
 	<packaging>pom</packaging>
 
 	<modules>
@@ -110,7 +110,7 @@ under the License.
 							<property>rootDir</property>
 							<project>
 								<groupId>org.apache.flink</groupId>
-								<artifactId>flink-connectors-pulsar</artifactId>
+								<artifactId>oceanus-flink-connectors</artifactId>
 							</project>
 						</configuration>
 					</execution>
